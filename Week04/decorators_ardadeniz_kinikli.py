@@ -11,17 +11,16 @@ def performance(func):
         setattr(performance,"total_mem",0)
     
     def _d1():
-         memory_used = sys.getsizeof(func)
-         start_time = time.time_ns()
-         func()
-         performance.counter += 1
-         end_time = time.time_ns()
-         elapsed = 0
+         tracemalloc.start()
+         start_time = time.perf_counter()
+         result = func(*args,**kwargs)
+         end_time = time.perf_counter()
          elapsed = end_time - start_time
-         performance.total_time += (int)(elapsed/1e9)
-         performance.total_mem += memory_used
-         return (performance.counter, performance.total_time, performance.total_mem)
-
+         current_mem, peak_mem = tracemalloc.get_traced_memory()
+         performance.counter += 1
+         performance.total_time += elapsed
+         performance.total_mem += peak_mem
+         return result
     return _d1
     
 
